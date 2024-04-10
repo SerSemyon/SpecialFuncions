@@ -1,32 +1,43 @@
 #include "CylindricalBody.h"
 
-std::complex<double> CylindricalBody::B_n(int n, double k_1, double k_2,
+
+CylindricalBody::CylindricalBody(double k_1, double k_2, double radiusCircle, double a_0)
+{
+    _k_1 = k_1;
+    _k_2 = k_2;
+    _R = radiusCircle;
+    _a_0 = a_0;
+}
+
+std::complex<double> CylindricalBody::B_n(int n,
     std::complex<double> J_nk_1, std::complex<double> J_nk_2, std::complex<double> dJ_nk_1, std::complex<double> dJ_nk_2,
     std::complex<double> H_n, std::complex<double> dH_n)
 {
-    std::complex<double> res = a_0 * (J_nk_1 * dJ_nk_2 * k_2 - J_nk_2 * dJ_nk_1 * k_1)
-        / (J_nk_2 * dH_n * k_1 - H_n * dJ_nk_2 * k_2);
+    std::complex<double> res = _a_0 * (J_nk_1 * dJ_nk_2 * _k_2 - J_nk_2 * dJ_nk_1 * _k_1)
+        / (J_nk_2 * dH_n * _k_1 - H_n * dJ_nk_2 * _k_2);
+    // вместо умножения на (-i) ^ n
     if (n == 0)
         return res;
     if (n % 2 != 0)
-        return res * std::complex<double>(0, 1);
+        return res * std::complex<double>(0, -1);
     return -res;
 }
 
-std::complex<double> CylindricalBody::C_n(int n, double k_1, double k_2,
+std::complex<double> CylindricalBody::C_n(int n,
     std::complex<double> J_nk_1, std::complex<double> J_nk_2, std::complex<double> dJ_nk_1, std::complex<double> dJ_nk_2,
     std::complex<double> H_n, std::complex<double> dH_n)
 {
-    std::complex<double> res = a_0 * (H_n * dJ_nk_1 * k_1 - J_nk_1 * dH_n * k_1)
-        / (H_n * dJ_nk_2 * k_2 - J_nk_2 * dH_n * k_1);
+    std::complex<double> res = _a_0 * (H_n * dJ_nk_1 * _k_1 - J_nk_1 * dH_n * _k_1)
+        / (H_n * dJ_nk_2 * _k_2 - J_nk_2 * dH_n * _k_1);
+    // вместо умножения на (-i) ^ n
     if (n == 0)
         return res;
     if (n % 2 != 0)
-        return res * std::complex<double>(0, 1);
+        return res * std::complex<double>(0, -1);
     return -res;
 }
 
-std::complex<double> CylindricalBody::find_B_0(double k_1, double k_2, double R)
+std::complex<double> CylindricalBody::find_B_0()
 {
     std::complex<double> prevJk_1;
     std::complex<double> prevJk_2;
@@ -40,8 +51,8 @@ std::complex<double> CylindricalBody::find_B_0(double k_1, double k_2, double R)
     std::complex<double> dJk_1;
     std::complex<double> dJk_2;
     std::complex<double> dH;
-    double x_1 = k_1 * R;
-    double x_2 = k_2 * R;
+    double x_1 = _k_1 * _R;
+    double x_2 = _k_2 * _R;
     Jk_1 = J_0(x_1);
     Jk_2 = J_0(x_2);
     H = std::complex<double>(Jk_1.real(), Y_0(x_1, Jk_1.real()));
@@ -54,10 +65,10 @@ std::complex<double> CylindricalBody::find_B_0(double k_1, double k_2, double R)
     dJk_1 = dZ(0, prevJk_1, nextJk_1);
     dJk_2 = dZ(0, prevJk_2, nextJk_2);
     dH = dZ(0, prevH, nextH);
-    return B_n(0, k_1, k_2, Jk_1, Jk_2, dJk_1, dJk_2, H, dH);
+    return B_n(0, Jk_1, Jk_2, dJk_1, dJk_2, H, dH);
 }
 
-std::complex<double> CylindricalBody::find_C_0(double k_1, double k_2, double R)
+std::complex<double> CylindricalBody::find_C_0()
 {
     std::complex<double> prevJk_1;
     std::complex<double> prevJk_2;
@@ -71,8 +82,8 @@ std::complex<double> CylindricalBody::find_C_0(double k_1, double k_2, double R)
     std::complex<double> dJk_1;
     std::complex<double> dJk_2;
     std::complex<double> dH;
-    double x_1 = k_1 * R;
-    double x_2 = k_2 * R;
+    double x_1 = _k_1 * _R;
+    double x_2 = _k_2 * _R;
     Jk_1 = J_0(x_1);
     Jk_2 = J_0(x_2);
     H = std::complex<double>(Jk_1.real(), Y_0(x_1, Jk_1.real()));
@@ -85,10 +96,10 @@ std::complex<double> CylindricalBody::find_C_0(double k_1, double k_2, double R)
     dJk_1 = dZ(0, prevJk_1, nextJk_1);
     dJk_2 = dZ(0, prevJk_2, nextJk_2);
     dH = dZ(0, prevH, nextH);
-    return C_n(0, k_1, k_2, Jk_1, Jk_2, dJk_1, dJk_2, H, dH);
+    return C_n(0, Jk_1, Jk_2, dJk_1, dJk_2, H, dH);
 }
 
-std::complex<double> CylindricalBody::find_B_n(int N, double k_1, double k_2, double R)
+std::complex<double> CylindricalBody::find_B_n(int N)
 {
     std::complex<double> prevJk_1;
     std::complex<double> prevJk_2;
@@ -105,8 +116,8 @@ std::complex<double> CylindricalBody::find_B_n(int N, double k_1, double k_2, do
     bool positive = (N > 0);
     if (!positive)
         N = -N;
-    double x_1 = k_1 * R;
-    double x_2 = k_2 * R;
+    double x_1 = _k_1 * _R;
+    double x_2 = _k_2 * _R;
     Jk_1 = J(x_1, N);
     Jk_2 = J(x_2, N);
     H = std::complex<double>(Jk_1.real(), Neumann(N, x_1, Jk_1.real()));
@@ -130,10 +141,10 @@ std::complex<double> CylindricalBody::find_B_n(int N, double k_1, double k_2, do
     dJk_1 = dZ(N, prevJk_1, nextJk_1);
     dJk_2 = dZ(N, prevJk_2, nextJk_2);
     dH = dZ(N, prevH, nextH);
-    return B_n(N, k_1, k_2, Jk_1, Jk_2, dJk_1, dJk_2, H, dH);
+    return B_n(N, Jk_1, Jk_2, dJk_1, dJk_2, H, dH);
 }
 
-std::complex<double> CylindricalBody::find_C_n(int N, double k_1, double k_2, double R)
+std::complex<double> CylindricalBody::find_C_n(int N)
 {
     std::complex<double> prevJk_1;
     std::complex<double> prevJk_2;
@@ -150,8 +161,8 @@ std::complex<double> CylindricalBody::find_C_n(int N, double k_1, double k_2, do
     bool positive = (N > 0);
     if (!positive)
         N = -N;
-    double x_1 = k_1 * R;
-    double x_2 = k_2 * R;
+    double x_1 = _k_1 * _R;
+    double x_2 = _k_2 * _R;
     Jk_1 = J(x_1, N);
     Jk_2 = J(x_2, N);
     H = std::complex<double>(Jk_1.real(), Neumann(N, x_1, Jk_1.real()));
@@ -175,13 +186,13 @@ std::complex<double> CylindricalBody::find_C_n(int N, double k_1, double k_2, do
     dJk_1 = dZ(N, prevJk_1, nextJk_1);
     dJk_2 = dZ(N, prevJk_2, nextJk_2);
     dH = dZ(N, prevH, nextH);
-    return C_n(N, k_1, k_2, Jk_1, Jk_2, dJk_1, dJk_2, H, dH);
+    return C_n(N, Jk_1, Jk_2, dJk_1, dJk_2, H, dH);
 }
 
-std::complex<double>** CylindricalBody::E_1(double k_1, double k_2, double* r, size_t count, size_t number_division, double R) {
+std::complex<double>** CylindricalBody::E_1(double* r, size_t count, size_t number_division) {
     double* k_1r = new double[count];
     for (size_t i = 0; i < count; i++) {
-        k_1r[i] = k_1 * r[i];
+        k_1r[i] = _k_1 * r[i];
     }
     std::complex<double>* H_values = new std::complex<double>[count];
     std::complex<double>* H_negative_values = new std::complex<double>[count];
@@ -193,7 +204,7 @@ std::complex<double>** CylindricalBody::E_1(double k_1, double k_2, double* r, s
     for (int i = 0; i < count; i++) {
         H_values[i] = H1(0, k_1r[i]);
     }
-    std::complex<double> b_0 = find_B_0(k_1, k_2, R);
+    std::complex<double> b_0 = find_B_0();
     double alpha = 2 * M_PI / number_division;
     std::complex<double> exp_in_pow;
     for (size_t i = 0; i < count; i++) {
@@ -207,7 +218,7 @@ std::complex<double>** CylindricalBody::E_1(double k_1, double k_2, double* r, s
         for (int j = 0; j < count; j++) {
             H_values[j] = H1(i, k_1r[j]);
         }
-        b_n = find_B_n(i, k_1, k_2, R);
+        b_n = find_B_n(i);
         for (size_t j = 0; j < count; j++) {
             for (size_t k = 0; k < number_division; k++) {
                 exp_in_pow = std::complex<double>(cos(i * k * alpha), sin(i * k * alpha));
@@ -217,7 +228,7 @@ std::complex<double>** CylindricalBody::E_1(double k_1, double k_2, double* r, s
         for (int j = 0; j < count; j++) {
             H_negative_values[j] = H_negative(i, H_values[j]);
         }
-        b_n = find_B_n(-i, k_1, k_2, R);
+        b_n = find_B_n(-i);
         for (size_t j = 0; j < count; j++) {
             for (size_t k = 0; k < number_division; k++) {
                 exp_in_pow = std::complex<double>(cos(i * k * alpha), sin(i * k * alpha));
@@ -228,10 +239,10 @@ std::complex<double>** CylindricalBody::E_1(double k_1, double k_2, double* r, s
     return E_z;
 }
 
-std::complex<double>** CylindricalBody::E_2(double k_1, double k_2, double* r, size_t count, size_t number_division, double R) {
+std::complex<double>** CylindricalBody::E_2(double* r, size_t count, size_t number_division) {
     double* k_2r = new double[count];
     for (size_t i = 0; i < count; i++) {
-        k_2r[i] = k_2 * r[i];
+        k_2r[i] = _k_2 * r[i];
     }
     std::complex<double>* J_values = new std::complex<double>[count];
     std::complex<double>* J_negative_values = new std::complex<double>[count];
@@ -241,7 +252,7 @@ std::complex<double>** CylindricalBody::E_2(double k_1, double k_2, double* r, s
         E_z[i] = new std::complex<double>[number_division];
     }
     BesselOrderedSet(k_2r, 0, J_values, count);
-    std::complex<double> c_0 = find_C_0(k_1, k_2, R);
+    std::complex<double> c_0 = find_C_0();
     double alpha = 2 * M_PI / number_division;
     std::complex<double> exp_in_pow;
     for (size_t i = 0; i < count; i++) {
@@ -253,7 +264,7 @@ std::complex<double>** CylindricalBody::E_2(double k_1, double k_2, double* r, s
     std::complex<double> c_n;
     for (int i = 1; i < number_iterations; i++) {
         BesselOrderedSet(k_2r, i, J_values, count);
-        c_n = find_C_n(i, k_1, k_2, R);
+        c_n = find_C_n(i);
         for (size_t j = 0; j < count; j++) {
             for (size_t k = 0; k < number_division; k++) {
                 exp_in_pow = std::complex<double>(cos(i * k * alpha), sin(i * k * alpha));
@@ -261,7 +272,7 @@ std::complex<double>** CylindricalBody::E_2(double k_1, double k_2, double* r, s
             }
         }
         J_negative(J_values, i, J_negative_values, count);
-        c_n = find_C_n(-i, k_1, k_2, R);
+        c_n = find_C_n(-i);
         for (size_t j = 0; j < count; j++) {
             for (size_t k = 0; k < number_division; k++) {
                 exp_in_pow = std::complex<double>(cos(i * k * alpha), sin(i * k * alpha));

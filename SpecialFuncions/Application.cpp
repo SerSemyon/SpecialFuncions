@@ -25,7 +25,7 @@ int main(void)
     if (!glfwInit())
         return -1;
 
-    window = glfwCreateWindow(1000, 1000, "Model", NULL, NULL);
+    window = glfwCreateWindow(1000, 1000, "Model cylindrical body", NULL, NULL);
     if (!window)
     {
         glfwTerminate();
@@ -34,11 +34,17 @@ int main(void)
 
     glfwMakeContextCurrent(window);
 
+    // число делений по радиусу
     size_t n = 500;
+    // число делений по углу
     size_t angles_count = 2000;
+    // значения функций внутри цилиндра на отрезке [0,R)
     double* r = new double[n];
+    // значения функций внутри цилиндра на отрезке [R, 2R)
     double* externalR = new double[n];
-    
+
+    // Параметры цилиндра и среды
+    double a_0 = 1;
     double k_1 = 1;
     double k_2 = 0.5;
     double radiusCircle = 1;
@@ -48,21 +54,13 @@ int main(void)
         r[i] = stepRadius * i;
         externalR[i] = radiusCircle + r[i];
     }
-    //std::complex<double>** res = E_2(1, 0.1, r, n, angles_count, 0.1);
-    // 
-    //std::complex<double>** res = E_2(1, 0.5, r, n, angles_count, 10);
-    //std::complex<double>** res = E_2(1, 0.5, r, n, angles_count, 10);
-    //std::complex<double>** res = E_2(0.5, 0.5, r, n, angles_count, 0.1);
-    // 
-    //std::complex<double>** E_2_values = E_2(0.1, 1, r, n, angles_count, 0.1);
-    //std::complex<double>** res = E_2(0.1, 1, r, n, angles_count, 10);
-    //std::complex<double>** res = E_2(0.1, 1, r, n, angles_count, 1);
-    //std::complex<double>** res = E_2(1, 1, r, n, angles_count, 1);
+
+    // Создание объекта цилиндра с параметрами
+    CylindricalBody cb(k_1, k_2, radiusCircle, a_0);
+    std::complex<double>** E_1_values = cb.E_1(externalR, n, angles_count);
+    std::complex<double>** E_2_values = cb.E_2(r, n, angles_count);
     
-    CylindricalBody cb;
-    std::complex<double>** E_1_values = cb.E_1(k_1, k_2, externalR, n, angles_count, radiusCircle);
-    std::complex<double>** E_2_values = cb.E_2(k_1, k_2, r, n, angles_count, radiusCircle);
-    
+    // Нахождение максимального значения модуля для нормирования значений по нему при отображении
     double max = 0;
     for (int i = 0; i < n; i++) {
         if (abs(E_1_values[i][0]) > max) {
@@ -82,6 +80,8 @@ int main(void)
             //glUniform4f(uColorLocation, 0.0f, 0.0f, 1.0f, 1.0f);
             for (int j = 0; j < angles_count; j++) {
                 //glColor3f(0.0, res[i][j].real() / max, res[i][j].imag() / max);
+                
+                // красный - модуль, зелёный - вещественная, синий - мнимая
                 glColor3f(abs(E_2_values[i][j]) / max, E_2_values[i][j].real() / max, E_2_values[i][j].imag() / max);
                 //glColor3f(abs(res[i][j]), res[i][j].real(), res[i][j].imag());
                 double angle = 2 * j * M_PI / angles_count;
