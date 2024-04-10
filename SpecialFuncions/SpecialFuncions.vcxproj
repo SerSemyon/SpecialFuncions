@@ -99,6 +99,7 @@
     <ClCompile Include="Application.cpp" />
     <ClCompile Include="BesselCPU.cpp" />
     <ClCompile Include="ChebyshevPolynomials.cpp" />
+    <ClCompile Include="CylindricalBody.cpp" />
     <ClCompile Include="GammaFunction.cpp" />
     <ClCompile Include="Hankel.cpp" />
     <ClCompile Include="Neumann.cpp" />
@@ -107,6 +108,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="CPUfunctions.h" />
+    <ClInclude Include="CylindricalBody.h" />
     <ClInclude Include="GPUfunctions.h" />
     <ClInclude Include="log_duration.h" />
     <ClInclude Include="Test.h" />
