@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.9.34723.18
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "SpecialFuncions", "SpecialFuncions\SpecialFuncions.vcxproj", "{E5627B6D-9B7F-4552-8FFF-082CD16A3239}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|x64 = Debug|x64
+		Release|x64 = Release|x64
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{E5627B6D-9B7F-4552-8FFF-082CD16A3239}.Debug|x64.ActiveCfg = Debug|x64
+		{E5627B6D-9B7F-4552-8FFF-082CD16A3239}.Debug|x64.Build.0 = Debug|x64
+		{E5627B6D-9B7F-4552-8FFF-082CD16A3239}.Release|x64.ActiveCfg = Release|x64
+		{E5627B6D-9B7F-4552-8FFF-082CD16A3239}.Release|x64.Build.0 = Release|x64
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {B563640E-FD7A-41D6-B49D-838D9A5661D4}
+	EndGlobalSection
+EndGlobal
