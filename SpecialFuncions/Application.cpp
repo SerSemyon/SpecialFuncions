@@ -37,7 +37,7 @@ int main(void)
     // число делений по радиусу
     size_t n = 500;
     // число делений по углу
-    size_t angles_count = 2000;
+    size_t angles_count = 4000;
     // значения функций внутри цилиндра на отрезке [0,R)
     double* r = new double[n];
     // значения функций внутри цилиндра на отрезке [R, 2R)
@@ -70,6 +70,8 @@ int main(void)
             max = abs(E_2_values[i][0]);
         }
     }
+
+    glClearColor(1, 1, 1, 1);
 
     while (!glfwWindowShouldClose(window))
     {
