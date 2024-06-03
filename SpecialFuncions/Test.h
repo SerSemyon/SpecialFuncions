@@ -23,3 +23,5 @@ void TestY_asymptotic();
 void Test_dZ();
 void TestCyl_next_order_CUDA();
 void Testrec_CUDA();
+void TestJ_0_T();
+void TestJ_1_T();

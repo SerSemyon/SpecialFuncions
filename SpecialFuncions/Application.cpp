@@ -18,8 +18,9 @@
 #include <complex>
 #include "CylindricalBody.h"
 
-int main(void)
-{
+#include "Test.h"
+
+int ShowWindowWithDiagram() {
     GLFWwindow* window;
 
     if (!glfwInit())
@@ -48,7 +49,7 @@ int main(void)
     double k_1 = 1;
     double k_2 = 0.5;
     double radiusCircle = 1;
-    
+
     double stepRadius = radiusCircle / n;
     for (size_t i = 0; i < n; i++) {
         r[i] = stepRadius * i;
@@ -59,7 +60,7 @@ int main(void)
     CylindricalBody cb(k_1, k_2, radiusCircle, a_0);
     std::complex<double>** E_1_values = cb.E_1(externalR, n, angles_count);
     std::complex<double>** E_2_values = cb.E_2(r, n, angles_count);
-    
+
     // Нахождение максимального значения модуля для нормирования значений по нему при отображении
     double max = 0;
     for (int i = 0; i < n; i++) {
@@ -76,32 +77,40 @@ int main(void)
     while (!glfwWindowShouldClose(window))
     {
         glClear(GL_COLOR_BUFFER_BIT);
-        
+
         glBegin(GL_POINTS);
         for (int i = 0; i < n; i++) {
             //glUniform4f(uColorLocation, 0.0f, 0.0f, 1.0f, 1.0f);
             for (int j = 0; j < angles_count; j++) {
                 //glColor3f(0.0, res[i][j].real() / max, res[i][j].imag() / max);
-                
+
                 // красный - модуль, зелёный - вещественная, синий - мнимая
-                glColor3f(abs(E_2_values[i][j]) / max, E_2_values[i][j].real() / max, E_2_values[i][j].imag() / max);
+                glColor3d(abs(E_2_values[i][j]) / max, E_2_values[i][j].real() / max, E_2_values[i][j].imag() / max);
                 //glColor3f(abs(res[i][j]), res[i][j].real(), res[i][j].imag());
                 double angle = 2 * j * M_PI / angles_count;
                 double radius = r[i] / radiusCircle / 2;
-                glVertex2f(radius * cos(angle), radius * sin(angle));
-        
-                glColor3f(abs(E_1_values[i][j]) / max, E_1_values[i][j].real() / max, E_1_values[i][j].imag() / max);
+                glVertex2d(radius * cos(angle), radius * sin(angle));
+
+                glColor3d(abs(E_1_values[i][j]) / max, E_1_values[i][j].real() / max, E_1_values[i][j].imag() / max);
                 radius = externalR[i] / radiusCircle / 2;
-                glVertex2f(radius * cos(angle), radius * sin(angle));
+                glVertex2d(radius * cos(angle), radius * sin(angle));
             }
         }
         glEnd;
-        
+
         glfwSwapBuffers(window);
-        
+
         glfwPollEvents();
     }
 
     glfwTerminate();
+    return 0;
+}
+
+int main(void)
+{
+    //ShowWindowWithDiagram();
+    TestJ_0_T();
+    TestJ_1_T();
     return 0;
 }

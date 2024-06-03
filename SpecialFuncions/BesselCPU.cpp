@@ -25,7 +25,7 @@ void J(const double v, const double* x, double* result, const unsigned int size)
 	int max_iterations = 100;
     double aNext;
     double diff;
-    for (int i = 0; i < size; i++) {
+    for (unsigned int i = 0; i < size; i++) {
         int k = 0;
         double aprev = 1 / Gamma(v + 1);
         double summ = aprev;
@@ -239,14 +239,14 @@ void J_negative(const int n, double* result, const unsigned int size, const doub
 {
 	if (n % 2 == 0)
 	{
-		for (int i = 0; i < size; i++)
+		for (unsigned int i = 0; i < size; i++)
 		{
 			result[i] = J_positive[i];
 		}
 	}
 	else
 	{
-		for (int i = 0; i < size; i++)
+		for (unsigned int i = 0; i < size; i++)
 		{
 			result[i] = -J_positive[i];
 		}
@@ -281,4 +281,54 @@ std::complex<double> J_negative(std::complex<double> J_positive, int n)
 	{
 		return J_positive;
 	}
+}
+
+const double c_T_0[9] = {
+	0.1577'2797'1474'8901'2,
+	-0.008723442352852221,
+	0.2651786132033368,
+	-0.37009499387264977,
+	0.15806710233209725,
+	-0.034893769411408884,
+	0.004819180069467605,
+	-0.00046062616620627504,
+	0.00003246032882100508
+};
+
+double J_0_T(double x) {
+	double z = x / 8.0;
+	double T_previous = 1.0, T_current = 2 * z * z - 1;
+	double T;
+	double s = c_T_0[0] * T_previous + c_T_0[1] * T_current;
+	for (int n = 2; n < 9; n++) {
+		T = (4.0 * z * z - 2) * T_current - T_previous;
+		s += c_T_0[n] * T;
+		T_previous = T_current; T_current = T;
+	};
+	return s;
+}
+
+const double c_T_1[9] = {
+	 0.05245819033465648458,
+	 0.04809646915823037394,
+	 0.31327508236156718380,
+	-0.24186740844740748475,
+	 0.07426679621678703781,
+	-0.01296762731173517510,
+	 0.00148991289666763839,
+	-0.00012227868505432427,
+	 0.00000756263022969605
+};
+
+double J_1_T(double x) {
+	double z = x / 8.0;
+	double T_previous = z, T_current = 4 * z * z * z - 3 * z;
+	double T;
+	double s = c_T_1[0] * T_previous + c_T_1[1] * T_current;
+	for (int n = 2; n < 9; n++) {
+		T = (4.0 * z * z - 2) * T_current - T_previous;
+		s += c_T_1[n] * T;
+		T_previous = T_current; T_current = T;
+	};
+	return s;
 }
