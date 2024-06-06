@@ -57,3 +57,6 @@ void cyl_next_order_CUDA(double v, double* x, double* result, unsigned int size,
 void BesselWithCuda(const double v, const double* const x, double* result, const unsigned int size_x, const unsigned int size_v);
 
 __global__ void cyl_next_order_OneThread(double v, double* x, double* result, unsigned int size, double* value_v, double* value_v_minus_1);
+
+void J_0_T_CUDA(const double* const x, double* result, const unsigned int size);
+void J_1_T_CUDA(const double* const x, double* result, const unsigned int size);

@@ -138,6 +138,8 @@ int main(void)
     //TestNeumannCPU();
     //TestNeumann_CUDA();
     TestJ_0_T();
-    TestJ_1_T();
+    TestJ_1_T(); 
+    TestJ_0_T_CUDA();
+    TestJ_1_T_CUDA();
     return 0;
 }

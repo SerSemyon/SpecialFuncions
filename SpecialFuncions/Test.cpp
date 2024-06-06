@@ -15,8 +15,8 @@ int nJ1 = 1000000;
 int nJ = 1000000;
 int nY0 = 10000000;
 int nY1 = 1000;
-double b0 = 15;
-double b1 = 15;
+double b0 = 8;
+double b1 = 8;
 double bJ = 15;
 double h0 = b0 / nJ0;
 double h1 = b1 / nJ1;
@@ -984,4 +984,82 @@ void TestJ_1_T()
     delete[] res2;
     if (successfully)
         std::cout << "TestJ_1_T OK" << std::endl << std::endl;
+}
+
+void TestJ_0_T_CUDA()
+{
+    std::cout << "TestJ_0_T_CUDA started" << std::endl;
+    int v = 0;
+    bool successfully = true;
+    double* x = new double[nJ0];
+    double* res1 = new double[nJ0];
+    double* res2 = new double[nJ0];
+    for (int i = 0; i < nJ0; i++)
+    {
+        x[i] = i * h0;
+    }
+
+    {
+        LOG_DURATION("Bessel");
+        BesselWithCuda(v, x, res1, nJ0);
+    }
+
+    {
+        LOG_DURATION("J_0_T");
+        J_0_T_CUDA(x, res2, nJ0);
+    }
+
+    for (int i = 0; i < nJ0; i++)
+    {
+        if (abs(res1[i] - res2[i]) > 1E-5)
+        {
+            std::cout << "WARNING!!!" << std::endl;
+            std::cout << "TestJ0_CUDA failed! point:" << x[i] << " |res1-resCPU|=" << abs(res1[i] - res2[i]) << std::endl << std::endl;
+            break;
+        }
+    }
+    delete[] x;
+    delete[] res1;
+    delete[] res2;
+    if (successfully)
+        std::cout << "TestJ_0_T_CUDA OK" << std::endl << std::endl;
+}
+
+void TestJ_1_T_CUDA()
+{
+    std::cout << "TestJ_1_T_CUDA started" << std::endl;
+    int v = 1;
+    bool successfully = true;
+    double* x = new double[nJ0];
+    double* res1 = new double[nJ0];
+    double* res2 = new double[nJ0];
+    for (int i = 0; i < nJ0; i++)
+    {
+        x[i] = i * h0;
+    }
+
+    {
+        LOG_DURATION("Bessel");
+        BesselWithCuda(v, x, res1, nJ0);
+    }
+
+    {
+        LOG_DURATION("J_1_T");
+        J_1_T_CUDA(x, res2, nJ0);
+    }
+
+    for (int i = 0; i < nJ0; i++)
+    {
+        if (abs(res1[i] - res2[i]) > 1E-5)
+        {
+            std::cout << "WARNING!!!" << std::endl;
+            std::cout << "TestJ_1_T_CUDA failed! point:" << x[i] << " |res1-resCPU|=" << abs(res1[i] - res2[i]) << std::endl << std::endl;
+            break;
+        }
+    }
+    delete[] x;
+    delete[] res1;
+    delete[] res2;
+    if (successfully)
+        std::cout << "TestJ_1_T_CUDA OK" << std::endl << std::endl;
 }

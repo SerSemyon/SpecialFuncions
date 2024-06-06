@@ -25,3 +25,5 @@ void TestCyl_next_order_CUDA();
 void Testrec_CUDA();
 void TestJ_0_T();
 void TestJ_1_T();
+void TestJ_0_T_CUDA();
+void TestJ_1_T_CUDA();

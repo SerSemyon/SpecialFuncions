@@ -351,3 +351,123 @@ void BesselWithCuda(const double v, const double* const x, double* result, const
     cudaFree(dev_res_0);
     cudaFree(dev_x);
 }
+
+/// <summary>
+/// Код одной нити GPU
+/// </summary>
+/// <param name="x"> значения параметра </param>
+/// <param name="v"> порядок функции </param>
+/// <param name="gamma"> значение гамма функции от (v+1) </param>
+/// <param name="result"> полученные значения </param>
+__global__ void J_0_T_OneThread(const double* x, double* result, int size)
+{
+    const double c_T_0[9] = {
+    0.1577'2797'1474'8901'2,
+    -0.008723442352852221,
+    0.2651786132033368,
+    -0.37009499387264977,
+    0.15806710233209725,
+    -0.034893769411408884,
+    0.004819180069467605,
+    -0.00046062616620627504,
+    0.00003246032882100508
+    };
+    int i = threadIdx.x + blockIdx.x * blockDim.x;
+    while (i < size)
+    {
+        double z = x[i] / 8.0;
+        double T_previous = 1.0, T_current = 2 * z * z - 1;
+        double T;
+        double s = c_T_0[0] * T_previous + c_T_0[1] * T_current;
+        for (int n = 2; n < 9; n++) {
+            T = (4.0 * z * z - 2) * T_current - T_previous;
+            s += c_T_0[n] * T;
+            T_previous = T_current; T_current = T;
+        };
+        result[i] = s;
+        i += blockDim.x * gridDim.x;
+    }
+}
+
+void J_0_T_CUDA(const double* const x, double* result, const unsigned int size)
+{
+    double* dev_x = 0;
+    double* dev_res = 0;
+
+    cudaMalloc((void**)&dev_res, size * sizeof(double));
+    cudaMalloc((void**)&dev_x, size * sizeof(double));
+    cudaMemcpy(dev_x, x, size * sizeof(double), cudaMemcpyHostToDevice);
+
+    {
+        LOG_DURATION("GPU without data transfers");
+        J_0_T_OneThread <<<(size + 127) / 128, 128 >>> (dev_x, dev_res, size);
+
+        cudaGetLastError();
+        cudaDeviceSynchronize();
+    }
+
+    cudaMemcpy(result, dev_res, size * sizeof(double), cudaMemcpyDeviceToHost);
+
+    cudaFree(dev_res);
+    cudaFree(dev_x);
+}
+
+/// <summary>
+/// Код одной нити GPU
+/// </summary>
+/// <param name="x"> значения параметра </param>
+/// <param name="v"> порядок функции </param>
+/// <param name="gamma"> значение гамма функции от (v+1) </param>
+/// <param name="result"> полученные значения </param>
+__global__ void J_1_T_OneThread(const double* x, double* result, int size)
+{
+    const double c_T_1[9] = {
+     0.05245819033465648458,
+     0.04809646915823037394,
+     0.31327508236156718380,
+    -0.24186740844740748475,
+     0.07426679621678703781,
+    -0.01296762731173517510,
+     0.00148991289666763839,
+    -0.00012227868505432427,
+     0.00000756263022969605
+    };
+    int i = threadIdx.x + blockIdx.x * blockDim.x;
+    while (i < size)
+    {
+        double z = x[i] / 8.0;
+        double T_previous = z, T_current = 4 * z * z * z - 3 * z;
+        double T;
+        double s = c_T_1[0] * T_previous + c_T_1[1] * T_current;
+        for (int n = 2; n < 9; n++) {
+            T = (4.0 * z * z - 2) * T_current - T_previous;
+            s += c_T_1[n] * T;
+            T_previous = T_current; T_current = T;
+        };
+        result[i] = s;
+        i += blockDim.x * gridDim.x;
+    }
+}
+
+void J_1_T_CUDA(const double* const x, double* result, const unsigned int size)
+{
+    double* dev_x = 0;
+    double* dev_res = 0;
+
+    cudaMalloc((void**)&dev_res, size * sizeof(double));
+    cudaMalloc((void**)&dev_x, size * sizeof(double));
+    cudaMemcpy(dev_x, x, size * sizeof(double), cudaMemcpyHostToDevice);
+
+    {
+        LOG_DURATION("GPU without data transfers");
+        J_1_T_OneThread <<<(size + 127) / 128, 128 >>> (dev_x, dev_res, size);
+
+        cudaGetLastError();
+        cudaDeviceSynchronize();
+    }
+
+    cudaMemcpy(result, dev_res, size * sizeof(double), cudaMemcpyDeviceToHost);
+
+    cudaFree(dev_res);
+    cudaFree(dev_x);
+}
