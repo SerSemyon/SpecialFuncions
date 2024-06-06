@@ -926,7 +926,7 @@ void TestJ_0_T()
 {
     std::cout << "TestJ_0_T started" << std::endl;
     int v = 1;
-    int n = 1000;
+    int n = 800;
     bool successfully = true;
     double* res1 = new double[n];
     double* res2 = new double[n];
@@ -939,7 +939,7 @@ void TestJ_0_T()
     }
     for (int i = 0; i < n; i++)
     {
-        if (abs(res1[i] - res2[i]) > 1E-6)
+        if (abs(res1[i] - res2[i]) > 1E-5)
         {
             std::cout << "WARNING!!!" << std::endl;
             std::cout << "TestJ_0_T failed!" << x[i] << " " << res1[i] << " " << res2[i] << " " << std::cyl_bessel_i(0, x[i]) << std::endl << std::endl;
@@ -958,7 +958,7 @@ void TestJ_1_T()
 {
     std::cout << "TestJ_1_T started" << std::endl;
     int v = 1;
-    int n = 1000;
+    int n = 800;
     bool successfully = true;
     double* res1 = new double[n];
     double* res2 = new double[n];

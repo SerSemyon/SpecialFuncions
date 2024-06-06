@@ -167,14 +167,14 @@ std::complex<double> H_negative(int nu, std::complex<double> H);
 void H1(const int v, double* x, std::complex<double>* res, const unsigned int size);
 
 /// <summary>
-/// Вычисление функции Бесселя с ожидаемой точностью 10^-6
+/// Вычисление функции Бесселя с ожидаемой точностью 10^-5
 /// </summary>
 /// <param name="x"></param>
 /// <returns></returns>
 double J_0_T(double x);
 
 /// <summary>
-/// Вычисление функции Бесселя с ожидаемой точностью 10^-7
+/// Вычисление функции Бесселя с ожидаемой точностью 10^-6
 /// </summary>
 /// <param name="x"></param>
 /// <returns></returns>

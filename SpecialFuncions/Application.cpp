@@ -20,6 +20,28 @@
 
 #include "Test.h"
 
+void write_to_csv(std::string name, std::complex<double>** values, double r, size_t angles_count, size_t n) {
+    std::ofstream out;
+    out.open(name + ".csv");
+    if (out.is_open())
+    {
+        out << ',';
+        for (size_t i = 0; i < angles_count; i++)
+        {
+            out << round( 2 * i * M_PI * 100 / angles_count) / 100 << ',';
+        }
+        out << '\n';
+        for (size_t i = 0; i < n; i++) {
+            out << i << ',';
+            for (size_t j = 0; j < angles_count - 1; j++) {
+                out << round(std::abs(values[i][j]) * 100) / 100 << ',';
+            }
+            out << round(std::abs(values[i][angles_count - 1]) * 100) / 100 << '\n';
+        }
+    }
+    out.close();
+}
+
 int ShowWindowWithDiagram() {
     GLFWwindow* window;
 
@@ -36,9 +58,9 @@ int ShowWindowWithDiagram() {
     glfwMakeContextCurrent(window);
 
     // число делений по радиусу
-    size_t n = 500;
+    size_t n = 50;
     // число делений по углу
-    size_t angles_count = 4000;
+    size_t angles_count = 40;
     // значения функций внутри цилиндра на отрезке [0,R)
     double* r = new double[n];
     // значения функций внутри цилиндра на отрезке [R, 2R)
@@ -46,8 +68,8 @@ int ShowWindowWithDiagram() {
 
     // Параметры цилиндра и среды
     double a_0 = 1;
-    double k_1 = 1;
-    double k_2 = 0.5;
+    double k_1 = 2;
+    double k_2 = 0.2;
     double radiusCircle = 1;
 
     double stepRadius = radiusCircle / n;
@@ -64,13 +86,16 @@ int ShowWindowWithDiagram() {
     // Нахождение максимального значения модуля для нормирования значений по нему при отображении
     double max = 0;
     for (int i = 0; i < n; i++) {
-        if (abs(E_1_values[i][0]) > max) {
-            max = abs(E_1_values[i][0]);
+        if (std::abs(E_1_values[i][0]) > max) {
+            max = std::abs(E_1_values[i][0]);
         }
-        if (abs(E_2_values[i][0]) > max) {
-            max = abs(E_2_values[i][0]);
+        if (std::abs(E_2_values[i][0]) > max) {
+            max = std::abs(E_2_values[i][0]);
         }
     }
+
+    write_to_csv("E1", E_1_values, radiusCircle, angles_count, n);
+    write_to_csv("E2", E_2_values, radiusCircle, angles_count, n);
 
     glClearColor(1, 1, 1, 1);
 
@@ -85,13 +110,13 @@ int ShowWindowWithDiagram() {
                 //glColor3f(0.0, res[i][j].real() / max, res[i][j].imag() / max);
 
                 // красный - модуль, зелёный - вещественная, синий - мнимая
-                glColor3d(abs(E_2_values[i][j]) / max, E_2_values[i][j].real() / max, E_2_values[i][j].imag() / max);
+                glColor3d(std::abs(E_2_values[i][j]) / max, std::abs(E_2_values[i][j]) / max, std::abs(E_2_values[i][j]) / max);
                 //glColor3f(abs(res[i][j]), res[i][j].real(), res[i][j].imag());
                 double angle = 2 * j * M_PI / angles_count;
                 double radius = r[i] / radiusCircle / 2;
                 glVertex2d(radius * cos(angle), radius * sin(angle));
 
-                glColor3d(abs(E_1_values[i][j]) / max, E_1_values[i][j].real() / max, E_1_values[i][j].imag() / max);
+                glColor3d(std::abs(E_1_values[i][j]) / max, std::abs(E_1_values[i][j]) / max, std::abs(E_1_values[i][j]) / max);
                 radius = externalR[i] / radiusCircle / 2;
                 glVertex2d(radius * cos(angle), radius * sin(angle));
             }
@@ -110,6 +135,8 @@ int ShowWindowWithDiagram() {
 int main(void)
 {
     //ShowWindowWithDiagram();
+    //TestNeumannCPU();
+    //TestNeumann_CUDA();
     TestJ_0_T();
     TestJ_1_T();
     return 0;

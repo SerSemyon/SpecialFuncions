@@ -97,7 +97,7 @@ double Neumann(int v, double x, double Jpositive)
 		k++;
 		if (k > max_iter)
 			break;
-		diff = abs(cur - prev);
+		diff = std::abs(cur - prev);
 	} while (diff > epsilon);
 	sumWithPsi *= std::pow(0.5 * x, v);
 	double f_1 = factV_minus_one;

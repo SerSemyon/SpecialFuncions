@@ -315,8 +315,8 @@ void BesselWithCuda(const double v, const double* const x, double* result, const
 
     {
         LOG_DURATION("GPU without data transfers");
-        J0_OneThread << <(size_x + 127) / 128, 128 >> > (dev_x, dev_res_0, size_x);
-        J1_OneThread << <(size_x + 127) / 128, 128 >> > (dev_x, dev_res_1, size_x);
+        J0_OneThread <<<(size_x + 127) / 128, 128 >>> (dev_x, dev_res_0, size_x);
+        J1_OneThread <<<(size_x + 127) / 128, 128 >>> (dev_x, dev_res_1, size_x);
 
         {
             LOG_DURATION("classic variant");

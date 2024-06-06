@@ -5,7 +5,6 @@
 const double eps = 1E-12;
 
 double J(double x, double v) {
-	double eps = 1E-12;
 	int k = 0;
 	double aprev = 1 / Gamma(v + 1);
 	double aNext;
