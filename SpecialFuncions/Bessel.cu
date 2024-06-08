@@ -258,15 +258,13 @@ __global__ void J1_OneThread(const double* x, double* result, int size)
     while (i < size)
     {
         double z = x[i] / 8.0;
-        double s = 0.0, T0 = 1.0, T1 = z;
+        double T_previous = z, T_current = 4 * z * z * z - 3 * z;
         double T;
-        s = s + a1[0] * T1;
-        for (int n = 1; n <= 17; n++) {
-            T = 2.0 * z * T1 - T0;
-            T0 = T1; T1 = T;
-            T = 2.0 * z * T1 - T0;
-            s = s + a1[n] * T;
-            T0 = T1; T1 = T;
+        double s = a1[0] * T_previous + a1[1] * T_current;
+        for (int n = 2; n < 18; n++) {
+            T = (4.0 * z * z - 2) * T_current - T_previous;
+            s += a1[n] * T;
+            T_previous = T_current; T_current = T;
         };
         result[i] = s;
         i += blockDim.x * gridDim.x;

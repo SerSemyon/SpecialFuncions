@@ -3,6 +3,7 @@
 unsigned int FindExecutionTime(void method());
 void TestBesselCPU();
 //void TestBesselNew();
+void TestNeumann_one_point();
 void TestNeumannCPU();
 void TestJ0(); 
 void TestJ1();
@@ -27,3 +28,6 @@ void TestJ_0_T();
 void TestJ_1_T();
 void TestJ_0_T_CUDA();
 void TestJ_1_T_CUDA();
+void Measure_J0_Time();
+void Measure_J1_Time();
+void Measure_Y0_Time();

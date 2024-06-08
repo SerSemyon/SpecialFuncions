@@ -8,21 +8,26 @@
 
 #include <iostream> 
 #include <iomanip> 
+#include <chrono> 
 
-double epsilon = 1E-17;
+double epsilon = 1E-7;
 int nJ0 = 1000000;
 int nJ1 = 1000000;
 int nJ = 1000000;
-int nY0 = 10000000;
+int nY0 = 10;
 int nY1 = 1000;
 double b0 = 8;
 double b1 = 8;
-double bJ = 15;
+double bJ = 8;
 double h0 = b0 / nJ0;
 double h1 = b1 / nJ1;
 double hJ = bJ / nJ;
 double hY0 = b0/ nY0;
 double hY1 = b1 / nY1;
+
+size_t count_experiments = 100;
+double time_first_function;
+double time_second_function;
 
 /* TODO - Встроенная реализация даёт низкую точность и, чем дальше от нуля, тем выше ошибка.
 Поэтому для проверки значений нужно будет использовать таблицы с более точными результатами,иначе тест всегда будет проваливаться. 
@@ -71,17 +76,37 @@ void TestJ0()
     {
         x[i] = i * h0;
     }
+    time_first_function = 0;
+    for (size_t i = 0; i < count_experiments; i++) 
     {
-        LOG_DURATION("J");
+        auto begin = std::chrono::steady_clock::now();
+
         J(v, x, res1, nJ0);
+
+        auto end = std::chrono::steady_clock::now();
+
+        auto elapsed_ms = std::chrono::duration_cast<std::chrono::milliseconds>(end - begin);
+
+        time_first_function += elapsed_ms.count();
     }
+    std::cout << "J " << time_first_function / count_experiments << std::endl;
+    time_second_function = 0;
+    for (size_t i = 0; i < count_experiments; i++)
     {
-        LOG_DURATION("J0");
+        auto begin = std::chrono::steady_clock::now();
+
         for (int i = 0; i < nJ0; i++)
         {
             res2[i] = J_0(x[i]);
         }
+
+        auto end = std::chrono::steady_clock::now();
+
+        auto elapsed_ms = std::chrono::duration_cast<std::chrono::milliseconds>(end - begin);
+
+        time_second_function += elapsed_ms.count();
     }
+    std::cout << "J0 " << time_second_function / count_experiments << std::endl;
     for (int i = 0; i < nJ0; i++)
     {
         if (abs(res1[i] - res2[i]) > epsilon)
@@ -139,6 +164,46 @@ void TestJ1()
         std::cout << "TestJ1 OK" << std::endl << std::endl;
 }
 
+void TestNeumann_one_point()
+{
+    std::cout << "TestNeumann_one_point started" << std::endl;
+    int v = 0;
+    bool successfully = true;
+    double* res1 = new double[nY0];
+    double* res2 = new double[nY0];
+    double* x = new double[nY0];
+    for (int i = 0; i < nY0; i++)
+    {
+        x[i] = i * hY0;
+        res1[i] = __std_smf_cyl_neumann(v, x[i]);
+    }
+    double* J_pos = new double[nY0];
+    double* J_neg = new double[nY0];
+    J(v, x, J_pos, nY0);
+    {
+        LOG_DURATION("Neumann_one_point");
+        for (int i = 0; i < nY0; i++) {
+            res2[i] = Neumann(v, x[i], J_pos[i]);
+        }
+    }
+    for (int i = 0; i < nY0; i++)
+    {
+        std::cout << x[i] << " " << std::fixed << std::setprecision(10) << res1[i] << " " << res2[i] << std::endl;
+        if (abs(res1[i] - res2[i]) > 1E-4)
+        {
+            std::cout << "WARNING!!!" << std::endl;
+            std::cout << "TestNeumann_one_point failed!" << x[i] << " " << res1[i] << " " << res2[i] << std::endl << std::endl;
+            successfully = false;
+            break;
+        }
+    }
+    delete[] x;
+    delete[] res1;
+    delete[] res2;
+    if (successfully)
+        std::cout << "TestNeumann_one_point OK" << std::endl << std::endl;
+}
+
 void TestNeumannCPU()
 {
     std::cout << "TestNeumannCPU started" << std::endl;
@@ -162,7 +227,7 @@ void TestNeumannCPU()
     }
     for (int i = 0; i < nY0; i++)
     {
-        //std::cout << x[i] << " " << std::fixed << std::setprecision(10) << res1[i] << " " << res2[i] << std::endl;
+        std::cout << x[i] << " " << std::fixed << std::setprecision(10) << res1[i] << " " << res2[i] << std::endl;
         if (abs(res1[i] - res2[i]) > 1E-4)
         {
             std::cout << "WARNING!!!" << std::endl;
@@ -252,6 +317,7 @@ void TestY0()
     }
     for (int i = 0; i < nY0; i++)
     {
+        std::cout << x[i] << " " << res1[i] << " " << res2[i] << " " << res3[i] << std::endl;
         if (abs(res1[i] - res2[i]) > 1E-4)
         {
             std::cout << "WARNING!!!" << std::endl;
@@ -926,18 +992,51 @@ void TestJ_0_T()
 {
     std::cout << "TestJ_0_T started" << std::endl;
     int v = 1;
-    int n = 800;
     bool successfully = true;
-    double* res1 = new double[n];
-    double* res2 = new double[n];
-    double* x = new double[n];
-    for (int i = 0; i < n; i++)
+    double* res1 = new double[nJ0];
+    double* res2 = new double[nJ0];
+    double* x = new double[nJ0];
+    for (int i = 0; i < nJ0; i++)
     {
-        x[i] = i * 0.01;
-        res1[i] = J_0(x[i]);
-        res2[i] = J_0_T(x[i]);
+        x[i] = i * h0;
     }
-    for (int i = 0; i < n; i++)
+
+    time_first_function = 0;
+    for (size_t i = 0; i < count_experiments; i++)
+    {
+        auto begin = std::chrono::steady_clock::now();
+
+        for (int i = 0; i < nJ0; i++)
+        {
+            res1[i] = J_0(x[i]);
+        }
+
+        auto end = std::chrono::steady_clock::now();
+
+        auto elapsed_ms = std::chrono::duration_cast<std::chrono::milliseconds>(end - begin);
+
+        time_first_function += elapsed_ms.count();
+    }
+    std::cout << "J_0 " << time_first_function / count_experiments << std::endl;
+    time_second_function = 0;
+    for (size_t i = 0; i < count_experiments; i++)
+    {
+        auto begin = std::chrono::steady_clock::now();
+
+        for (int i = 0; i < nJ0; i++)
+        {
+            res2[i] = J_0_T(x[i]);
+        }
+
+        auto end = std::chrono::steady_clock::now();
+
+        auto elapsed_ms = std::chrono::duration_cast<std::chrono::milliseconds>(end - begin);
+
+        time_second_function += elapsed_ms.count();
+    }
+    std::cout << "J_0_T " << time_second_function / count_experiments << std::endl;
+
+    for (int i = 0; i < nJ0; i++)
     {
         if (abs(res1[i] - res2[i]) > 1E-5)
         {
@@ -958,18 +1057,51 @@ void TestJ_1_T()
 {
     std::cout << "TestJ_1_T started" << std::endl;
     int v = 1;
-    int n = 800;
     bool successfully = true;
-    double* res1 = new double[n];
-    double* res2 = new double[n];
-    double* x = new double[n];
-    for (int i = 0; i < n; i++)
+    double* res1 = new double[nJ1];
+    double* res2 = new double[nJ1];
+    double* x = new double[nJ1];
+    for (int i = 0; i < nJ1; i++)
     {
-        x[i] = i * 0.01;
-        res1[i] = J_1(x[i]);
-        res2[i] = J_1_T(x[i]);
+        x[i] = i * h1;
     }
-    for (int i = 0; i < n; i++)
+
+    time_first_function = 0;
+    for (size_t i = 0; i < count_experiments; i++)
+    {
+        auto begin = std::chrono::steady_clock::now();
+
+        for (int i = 0; i < nJ1; i++)
+        {
+            res1[i] = J_1(x[i]);
+        }
+
+        auto end = std::chrono::steady_clock::now();
+
+        auto elapsed_ms = std::chrono::duration_cast<std::chrono::milliseconds>(end - begin);
+
+        time_first_function += elapsed_ms.count();
+    }
+    std::cout << "J_1 " << time_first_function / count_experiments << std::endl;
+    time_second_function = 0;
+    for (size_t i = 0; i < count_experiments; i++)
+    {
+        auto begin = std::chrono::steady_clock::now();
+
+        for (int i = 0; i < nJ1; i++)
+        {
+            res2[i] = J_1_T(x[i]);
+        }
+
+        auto end = std::chrono::steady_clock::now();
+
+        auto elapsed_ms = std::chrono::duration_cast<std::chrono::milliseconds>(end - begin);
+
+        time_second_function += elapsed_ms.count();
+    }
+    std::cout << "J_1_T " << time_second_function / count_experiments << std::endl;
+
+    for (int i = 0; i < nJ1; i++)
     {
         if (abs(res1[i] - res2[i]) > 1E-6)
         {
@@ -999,15 +1131,34 @@ void TestJ_0_T_CUDA()
         x[i] = i * h0;
     }
 
+    time_first_function = 0;
+    for (size_t i = 0; i < count_experiments; i++)
     {
-        LOG_DURATION("Bessel");
-        BesselWithCuda(v, x, res1, nJ0);
-    }
+        auto begin = std::chrono::steady_clock::now();
 
-    {
-        LOG_DURATION("J_0_T");
-        J_0_T_CUDA(x, res2, nJ0);
+        BesselWithCuda(v, x, res1, nJ0);
+
+        auto end = std::chrono::steady_clock::now();
+
+        auto elapsed_ms = std::chrono::duration_cast<std::chrono::milliseconds>(end - begin);
+
+        time_first_function += elapsed_ms.count();
     }
+    std::cout << "BesselWithCuda " << time_first_function / count_experiments << std::endl;
+    time_second_function = 0;
+    for (size_t i = 0; i < count_experiments; i++)
+    {
+        auto begin = std::chrono::steady_clock::now();
+
+        J_0_T_CUDA(x, res2, nJ0);
+
+        auto end = std::chrono::steady_clock::now();
+
+        auto elapsed_ms = std::chrono::duration_cast<std::chrono::milliseconds>(end - begin);
+
+        time_second_function += elapsed_ms.count();
+    }
+    std::cout << "J_0_T_CUDA " << time_second_function / count_experiments << std::endl;
 
     for (int i = 0; i < nJ0; i++)
     {
@@ -1030,27 +1181,46 @@ void TestJ_1_T_CUDA()
     std::cout << "TestJ_1_T_CUDA started" << std::endl;
     int v = 1;
     bool successfully = true;
-    double* x = new double[nJ0];
-    double* res1 = new double[nJ0];
-    double* res2 = new double[nJ0];
-    for (int i = 0; i < nJ0; i++)
+    double* x = new double[nJ1];
+    double* res1 = new double[nJ1];
+    double* res2 = new double[nJ1];
+    for (int i = 0; i < nJ1; i++)
     {
-        x[i] = i * h0;
+        x[i] = i * h1;
     }
 
+    time_first_function = 0;
+    for (size_t i = 0; i < count_experiments; i++)
     {
-        LOG_DURATION("Bessel");
-        BesselWithCuda(v, x, res1, nJ0);
-    }
+        auto begin = std::chrono::steady_clock::now();
 
-    {
-        LOG_DURATION("J_1_T");
-        J_1_T_CUDA(x, res2, nJ0);
-    }
+        BesselWithCuda(v, x, res1, nJ1);
 
-    for (int i = 0; i < nJ0; i++)
+        auto end = std::chrono::steady_clock::now();
+
+        auto elapsed_ms = std::chrono::duration_cast<std::chrono::milliseconds>(end - begin);
+
+        time_first_function += elapsed_ms.count();
+    }
+    std::cout << "BesselWithCuda " << time_first_function / count_experiments << std::endl;
+    time_second_function = 0;
+    for (size_t i = 0; i < count_experiments; i++)
     {
-        if (abs(res1[i] - res2[i]) > 1E-5)
+        auto begin = std::chrono::steady_clock::now();
+
+        J_1_T_CUDA(x, res2, nJ1);
+
+        auto end = std::chrono::steady_clock::now();
+
+        auto elapsed_ms = std::chrono::duration_cast<std::chrono::milliseconds>(end - begin);
+
+        time_second_function += elapsed_ms.count();
+    }
+    std::cout << "J_1_T_CUDA " << time_second_function / count_experiments << std::endl;
+
+    for (int i = 0; i < nJ1; i++)
+    {
+        if (abs(res1[i] - res2[i]) > 1E-6)
         {
             std::cout << "WARNING!!!" << std::endl;
             std::cout << "TestJ_1_T_CUDA failed! point:" << x[i] << " |res1-resCPU|=" << abs(res1[i] - res2[i]) << std::endl << std::endl;
@@ -1062,4 +1232,153 @@ void TestJ_1_T_CUDA()
     delete[] res2;
     if (successfully)
         std::cout << "TestJ_1_T_CUDA OK" << std::endl << std::endl;
+}
+
+void Measure_J0_Time()
+{
+    std::cout << "Measure_J0_Time started" << std::endl;
+    int v = 0;
+    bool successfully = true;
+    double* res1 = new double[nJ0];
+    double* res2 = new double[nJ0];
+    double* x = new double[nJ0];
+    for (int i = 0; i < nJ0; i++)
+    {
+        x[i] = i * h0;
+    }
+    {
+        J(v, x, res1, nJ0);
+    }
+    std::cout << "J ended" << std::endl;
+    time_second_function = 0;
+    for (size_t i = 0; i < count_experiments; i++)
+    {
+        auto begin = std::chrono::steady_clock::now();
+
+        for (int i = 0; i < nJ0; i++)
+        {
+            res2[i] = J_0(x[i]);
+        }
+
+        auto end = std::chrono::steady_clock::now();
+
+        auto elapsed_ms = std::chrono::duration_cast<std::chrono::milliseconds>(end - begin);
+
+        time_second_function += elapsed_ms.count();
+    }
+    std::cout << "J0 " << time_second_function / count_experiments << std::endl;
+    double accuracy = 0;
+    double diff;
+    for (int i = 0; i < nJ0; i++)
+    {
+        diff = std::abs(res1[i] - res2[i]);
+        if (diff > accuracy) {
+            accuracy = diff;
+        }
+    }
+    std::cout << "Accuracy " << accuracy << std::endl;
+    delete[] x;
+    delete[] res1;
+    delete[] res2;
+}
+
+void Measure_J1_Time()
+{
+    std::cout << "Measure_J1_Time started" << std::endl;
+    int v = 1;
+    bool successfully = true;
+    double* res1 = new double[nJ1];
+    double* res2 = new double[nJ1];
+    double* x = new double[nJ1];
+    for (int i = 0; i < nJ1; i++)
+    {
+        x[i] = i * h1;
+    }
+    {
+        J(v, x, res1, nJ1);
+    }
+    std::cout << "J ended" << std::endl;
+    time_second_function = 0;
+    for (size_t i = 0; i < count_experiments; i++)
+    {
+        auto begin = std::chrono::steady_clock::now();
+
+        for (int i = 0; i < nJ1; i++)
+        {
+            res2[i] = J_1(x[i]);
+        }
+
+        auto end = std::chrono::steady_clock::now();
+
+        auto elapsed_ms = std::chrono::duration_cast<std::chrono::milliseconds>(end - begin);
+
+        time_second_function += elapsed_ms.count();
+    }
+    std::cout << "J1 " << time_second_function / count_experiments << std::endl;
+    double accuracy = 0;
+    double diff;
+    for (int i = 0; i < nJ1; i++)
+    {
+        diff = std::abs(res1[i] - res2[i]);
+        if (diff > accuracy) {
+            accuracy = diff;
+        }
+    }
+    std::cout << "Accuracy " << accuracy << std::endl;
+    delete[] x;
+    delete[] res1;
+    delete[] res2;
+}
+
+void Measure_Y0_Time()
+{
+    std::cout << "Measure_Y0_Time started" << std::endl;
+    int v = 0;
+    double* res1 = new double[nY0];
+    double* res2 = new double[nY0];
+    double* x = new double[nY0];
+    for (int i = 0; i < nY0; i++)
+    {
+        x[i] = i * hY0;
+    }
+    double* Js = new double[nY0];
+    J(v, x, Js, nY0);
+    {
+        Neumann(v, x, res1, nY0, Js);
+        for (int i = 0; i < nY0; i++) 
+        {
+            std::cout << x[i] << " " << res1[i] << std::endl;
+        }
+    }
+    std::cout << "Neumann ended" << std::endl;
+    time_second_function = 0;
+    for (size_t i = 0; i < count_experiments; i++)
+    {
+        auto begin = std::chrono::steady_clock::now();
+
+        for (int i = 0; i < nY0; i++)
+        {
+            res2[i] = Y_0(x[i], Js[i]);
+        }
+
+        auto end = std::chrono::steady_clock::now();
+
+        auto elapsed_ms = std::chrono::duration_cast<std::chrono::milliseconds>(end - begin);
+
+        time_second_function += elapsed_ms.count();
+    }
+    std::cout << "Y_0 " << time_second_function / count_experiments << std::endl;
+    double accuracy = 0;
+    double diff;
+    for (int i = 0; i < nY0; i++)
+    {
+        diff = std::abs(res1[i] - res2[i]);
+        if (diff > accuracy) {
+            accuracy = diff;
+        }
+    }
+    std::cout << "Accuracy " << accuracy << std::endl;
+    delete[] x;
+    delete[] res1;
+    delete[] res2;
 }

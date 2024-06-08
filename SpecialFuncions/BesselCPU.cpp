@@ -102,13 +102,11 @@ const double a1[18] =
 
 double J_1(double x) {
 	double z = x / 8.0;
-	double T_previous = 1.0, T_current = z;
+	double T_previous = z, T_current = 4 * z * z * z - 3 * z;
 	double T;
-	double s = a1[0] * T_current;
-	for (int n = 1; n <= 17; n++) {
-		T = 2.0 * z * T_current - T_previous;
-		T_previous = T_current; T_current = T;
-		T = 2.0 * z * T_current - T_previous;
+	double s = a1[0] * T_previous + a1[1] * T_current;
+	for (int n = 2; n <= 17; n++) {
+		T = (4.0 * z * z - 2) * T_current - T_previous;
 		s += a1[n] * T;
 		T_previous = T_current; T_current = T;
 	};

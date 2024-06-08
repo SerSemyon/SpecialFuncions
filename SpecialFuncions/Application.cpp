@@ -58,9 +58,9 @@ int ShowWindowWithDiagram() {
     glfwMakeContextCurrent(window);
 
     // число делений по радиусу
-    size_t n = 50;
+    size_t n = 500;
     // число делений по углу
-    size_t angles_count = 40;
+    size_t angles_count = 1000;
     // значения функций внутри цилиндра на отрезке [0,R)
     double* r = new double[n];
     // значения функций внутри цилиндра на отрезке [R, 2R)
@@ -94,10 +94,11 @@ int ShowWindowWithDiagram() {
         }
     }
 
-    write_to_csv("E1", E_1_values, radiusCircle, angles_count, n);
-    write_to_csv("E2", E_2_values, radiusCircle, angles_count, n);
+   /* write_to_csv("E1", E_1_values, radiusCircle, angles_count, n);
+    write_to_csv("E2", E_2_values, radiusCircle, angles_count, n);*/
 
-    glClearColor(1, 1, 1, 1);
+    //glClearColor(1, 1, 1, 1);
+    glClearColor(0, 0, 0, 0);
 
     while (!glfwWindowShouldClose(window))
     {
@@ -121,7 +122,7 @@ int ShowWindowWithDiagram() {
                 glVertex2d(radius * cos(angle), radius * sin(angle));
             }
         }
-        glEnd;
+        glEnd();
 
         glfwSwapBuffers(window);
 
@@ -134,12 +135,19 @@ int ShowWindowWithDiagram() {
 
 int main(void)
 {
+    //Measure_J0_Time();
+    //Measure_J1_Time();
+    //TestY0();
+    //Measure_Y0_Time();
+    //TestJ0();
     //ShowWindowWithDiagram();
-    //TestNeumannCPU();
+    TestNeumann_one_point();
+    TestNeumannCPU();
+    TestJ1_CUDA();
     //TestNeumann_CUDA();
-    TestJ_0_T();
+    /*TestJ_0_T();
     TestJ_1_T(); 
     TestJ_0_T_CUDA();
-    TestJ_1_T_CUDA();
+    TestJ_1_T_CUDA();*/
     return 0;
 }

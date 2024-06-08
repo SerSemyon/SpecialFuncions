@@ -11,7 +11,11 @@ int max_iter = 10000;
 void Neumann(int v, double* x, double* res, int size, double* Jpositive)
 {
 	unsigned int factV_minus_one = Fact(v - 1);
-	unsigned int factV = factV_minus_one * v;
+	unsigned int factV = 1;
+	if (v != 0) {
+		factV_minus_one = Fact(v - 1);
+		factV = factV_minus_one * v;
+	}
 	unsigned int factKN = factV;
 	double S_2 = 0;
 	unsigned int factK = 1;
