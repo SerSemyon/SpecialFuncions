@@ -205,33 +205,34 @@ std::complex<double>** CylindricalBody::E_1(double* r, size_t count, size_t numb
         H_values[i] = H1(0, k_1r[i]);
     }
     std::complex<double> b_0 = find_B_0();
-    double alpha = 2 * M_PI / number_division;
+    double step_angle = 2 * M_PI / number_division;
     std::complex<double> exp_in_pow;
     for (size_t i = 0; i < count; i++) {
         for (size_t j = 0; j < number_division; j++) {
-            exp_in_pow = std::complex<double>(cos(j * alpha), sin(j * alpha));
-            E_z[i][j] = b_0 * H_values[i] * exp_in_pow;
+            E_z[i][j] = b_0 * H_values[i];
+            //std::cout << i << "R " << j * step_angle << "alpha " << E_z[i][j] << std::endl;
         }
     }
     std::complex<double> b_n;
-    for (int i = 1; i < number_iterations; i++) {
+    for (int n = 1; n < number_iterations; n++) {
         for (int j = 0; j < count; j++) {
-            H_values[j] = H1(i, k_1r[j]);
+            H_values[j] = H1(n, k_1r[j]);
         }
-        b_n = find_B_n(i);
+        b_n = find_B_n(n);
         for (size_t j = 0; j < count; j++) {
             for (size_t k = 0; k < number_division; k++) {
-                exp_in_pow = std::complex<double>(cos(i * k * alpha), sin(i * k * alpha));
+                exp_in_pow = exp(std::complex<double>(0, n * k * step_angle)); //std::complex<double>(cos(i * k * alpha), sin(i * k * alpha));
                 E_z[j][k] += b_n * H_values[j] * exp_in_pow;
+                //std::cout << j << "R " << k * step_angle << "alpha " << E_z[j][k] << std::endl;
             }
         }
         for (int j = 0; j < count; j++) {
-            H_negative_values[j] = H_negative(i, H_values[j]);
+            H_negative_values[j] = H_negative(n, H_values[j]);
         }
-        b_n = find_B_n(-i);
+        b_n = find_B_n(-n);
         for (size_t j = 0; j < count; j++) {
             for (size_t k = 0; k < number_division; k++) {
-                exp_in_pow = std::complex<double>(cos(i * k * alpha), sin(i * k * alpha));
+                exp_in_pow = exp(std::complex<double>(0, n * k * step_angle)); //std::complex<double>(cos(n * k * step_angle), sin(n * k * step_angle));
                 E_z[j][k] += b_n * H_negative_values[j] * exp_in_pow;
             }
         }
@@ -253,29 +254,28 @@ std::complex<double>** CylindricalBody::E_2(double* r, size_t count, size_t numb
     }
     BesselOrderedSet(k_2r, 0, J_values, count);
     std::complex<double> c_0 = find_C_0();
-    double alpha = 2 * M_PI / number_division;
+    double step_angle = 2 * M_PI / number_division;
     std::complex<double> exp_in_pow;
     for (size_t i = 0; i < count; i++) {
         for (size_t j = 0; j < number_division; j++) {
-            exp_in_pow = std::complex<double>(cos(j * alpha), sin(j * alpha));
-            E_z[i][j] = c_0 * J_values[i] * exp_in_pow;
+            E_z[i][j] = c_0 * J_values[i];
         }
     }
     std::complex<double> c_n;
-    for (int i = 1; i < number_iterations; i++) {
-        BesselOrderedSet(k_2r, i, J_values, count);
-        c_n = find_C_n(i);
+    for (int n = 1; n < number_iterations; n++) {
+        BesselOrderedSet(k_2r, n, J_values, count);
+        c_n = find_C_n(n);
         for (size_t j = 0; j < count; j++) {
             for (size_t k = 0; k < number_division; k++) {
-                exp_in_pow = std::complex<double>(cos(i * k * alpha), sin(i * k * alpha));
+                exp_in_pow = exp(std::complex<double>(0, n * k * step_angle));// std::complex<double>(cos(n * k * alpha), sin(n * k * alpha));
                 E_z[j][k] += c_n * J_values[j] * exp_in_pow;
             }
         }
-        J_negative(J_values, i, J_negative_values, count);
-        c_n = find_C_n(-i);
+        J_negative(J_values, n, J_negative_values, count);
+        c_n = find_C_n(-n);
         for (size_t j = 0; j < count; j++) {
             for (size_t k = 0; k < number_division; k++) {
-                exp_in_pow = std::complex<double>(cos(i * k * alpha), sin(i * k * alpha));
+                exp_in_pow = exp(std::complex<double>(0, n * k * step_angle));//std::complex<double>(cos(n * k * step_angle), sin(n * k * step_angle));
                 E_z[j][k] += c_n * J_negative_values[j] * exp_in_pow;
             }
         }
